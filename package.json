@@ -13,7 +13,9 @@
   "author": "Suresh Balla",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.2.0",
     "express": "^4.3.1",
+    "jsonschema": "^0.4.0",
     "underscore": "^1.6.0"
   },
   "devDependencies": {
