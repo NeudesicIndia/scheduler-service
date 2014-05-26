@@ -23,8 +23,18 @@
 			var schemaValidationResult = validator.validate(schedule, schema.schedule);
 			console.log(schemaValidationResult);
 			console.log(schemaValidationResult.errors.length === 0? "Good schema" : "Bad schema");
+			
 			res.set("Content-Type", "application/json");
-			res.send({ client: clientTenant, user: user });
+			
+			console.log("config is: " + app.get("mongodbconnectionstring"));
+			
+			if(schemaValidationResult.errors.length !== 0){
+				res.send(400, schemaValidationResult.errors);
+			}
+			else{
+				res.set("Content-Type", "application/json");
+				res.send({ client: clientTenant, user: user });
+			}
 		});
 	};
 	

@@ -1,7 +1,7 @@
 (function (schema){
 	
 	schema.schedule = {
-			"id": "/schedulerschema",
+			"id": "/scheduleschema",
 		    "type": "object",
 		    "properties": {
 		    	"id": {
@@ -29,10 +29,11 @@
 							"items": "string",
 							"required": false
 						}
-				    }
+				    },
+				    "required": true
 				},
 				"request": {
-					"id": "/schedulerrequest",
+					"id": "/schedulerequest",
 				    "type": "object",
 				    "properties": {
 				    	"url": {
@@ -43,11 +44,23 @@
 							"type": "string",
 							"required": false
 						}
-				    }
+				    },
+				    "required": true,
 				},
 				"custom": {
 					"type": "object",
 					"required": false
+				},
+				"options": {
+					"id": "/scheduleoptions",
+				    "type": "object",
+				    "properties": {
+				    	"multipart": {
+				    		"type": "string",
+				    		"required": false
+				    	}
+				    },
+				    "required": false
 				}
 		    }
 	};
