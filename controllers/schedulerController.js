@@ -2,11 +2,12 @@
 	
 	var schema = require("../schema");
 	var Validator = require('jsonschema').Validator;
-	var db = require('mongoskin');
+	var mongo = require('mongoskin');
 	var validator = new Validator();
 	
 	schedulerController.init = function (app){
 		var agendaInstance = app.get("agendaInstance");
+		var db = mongo.db(app.get("mongodbconnectionstring"), {native_parser:true});
 		
 		app.get("/scheduler/:clienttenant", function (req, res){
 			var user = req.query.user;
@@ -16,7 +17,7 @@
 			var filter = {};
 			
 			if(typeof id !== "undefined"){
-				filter["_id"] = db.helper.toObjectID(id);
+				filter["_id"] = mongo.helper.toObjectID(id);
 			}
 			
 			if(typeof user !== "undefined"){
@@ -81,6 +82,39 @@
 				});
 			}
 		});
+		
+		app.delete("/scheduler/:clienttenant", function (req, res){
+			var user = req.query.user;
+			var id = req.query.id;
+			var clientTenant = req.params.clienttenant;
+			
+			var filter = {};
+			
+			if(typeof id !== "undefined"){
+				filter["_id"] = db.helper.toObjectID(id);
+			}
+			
+			if(typeof user !== "undefined"){
+				filter["data.schedule.user"] = user;
+			}
+			
+			if(typeof clientTenant !== "undefined"){
+				filter["data.clientTenant"] = clientTenant;
+			}
+			
+			db.bind('agendaJobs');
+			db.agendaJobs.remove(filter, function(err){
+				if(!err){
+			    	console.log("Successfully removed job from collection");
+			    	res.send(200);
+			    }
+				else{
+					res.set("Content-Type", "application/json");
+					res.send(404);
+				}
+			});
+		});
+		
 	};
 	
 })(module.exports);
