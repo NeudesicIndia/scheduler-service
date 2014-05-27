@@ -47,6 +47,14 @@
 				    },
 				    "required": true,
 				},
+				"user": {
+					"type": "string",
+					"required": true
+				},
+				"scheduleCRONexp": {
+					"type": "string",
+					"required": true
+				},
 				"custom": {
 					"type": "object",
 					"required": false

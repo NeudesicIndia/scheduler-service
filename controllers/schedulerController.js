@@ -2,16 +2,47 @@
 	
 	var schema = require("../schema");
 	var Validator = require('jsonschema').Validator;
+	var db = require('mongoskin');
 	var validator = new Validator();
 	
 	schedulerController.init = function (app){
+		var agendaInstance = app.get("agendaInstance");
+		
 		app.get("/scheduler/:clienttenant", function (req, res){
 			var user = req.query.user;
-			var schedule = req.param.schedule;
-			
+			var id = req.query.id;
 			var clientTenant = req.params.clienttenant;
-			res.set("Content-Type", "application/json");
-			res.send({ client: clientTenant, user: user });
+			
+			var filter = {};
+			
+			if(typeof id !== "undefined"){
+				filter["_id"] = db.helper.toObjectID(id);
+			}
+			
+			if(typeof user !== "undefined"){
+				filter["data.schedule.user"] = user;
+			}
+			
+			if(typeof clientTenant !== "undefined"){
+				filter["data.clientTenant"] = clientTenant;
+			}
+			
+			agendaInstance.jobs(filter, function(err, jobs) {
+				if(jobs.length > 0 && typeof jobs[0] !== 'undefined'){
+					res.set("Content-Type", "application/json");
+					var jobsResponse = new Array();
+					
+					jobs.forEach(function(job){
+						jobsResponse.push({ id : job.attrs._id, schedule : job.attrs.data.schedule });
+					});
+					
+					res.send(200, jobsResponse);
+				}
+				else{
+					res.set("Content-Type", "application/json");
+					res.send(404);
+				}
+			});			
 		});
 		
 		app.post("/scheduler/:clienttenant", function (req, res){
@@ -32,8 +63,22 @@
 				res.send(400, schemaValidationResult.errors);
 			}
 			else{
-				res.set("Content-Type", "application/json");
-				res.send({ client: clientTenant, user: user });
+				var jobData = {
+					clientTenant: clientTenant,
+					schedule: schedule
+				};
+				var job = agendaInstance.create(app.get("reportemailjobename"), jobData);
+				job.repeatEvery(jobData.schedule.scheduleCRONexp);
+				job.save(function(err) {
+					if(!err){
+						console.log("Job successfully saved.");
+						res.set("Content-Type", "application/json");
+						res.send(201, job.attrs._id);
+					}
+					else{
+						res.send(500, "Unable to create schedule");
+					}
+				});
 			}
 		});
 	};

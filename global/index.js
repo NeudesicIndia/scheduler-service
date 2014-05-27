@@ -18,10 +18,10 @@
 		//parse application/vnd.api+json as json
 		app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 		
-		controllers.init(app);
-		
 		var agenda = new Agenda({db: { address: app.get("mongodbconnectionstring")}});
 		app.set("agendaInstance", agenda);
+		
+		controllers.init(app);
 		
 		jobs.init(app);
 	};
