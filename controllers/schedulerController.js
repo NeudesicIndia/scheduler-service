@@ -8,6 +8,7 @@
 	schedulerController.init = function (app){
 		var agendaInstance = app.get("agendaInstance");
 		var db = mongo.db(app.get("mongodbconnectionstring"), {native_parser:true});
+		var winstonInstance = app.get("winstonInstance");
 		
 		app.get("/scheduler/:clienttenant", function (req, res){
 			var user = req.query.user;
@@ -43,6 +44,10 @@
 					res.set("Content-Type", "application/json");
 					res.send(404);
 				}
+				
+				if(err){
+					winstonInstance.error("Unable to read schedules from mongodb", err);
+				}
 			});			
 		});
 		
@@ -77,6 +82,7 @@
 						res.send(201, job.attrs._id);
 					}
 					else{
+						winstonInstance.error("Unable to create/insert schedules to mongodb", err);
 						res.send(500, "Unable to create schedule");
 					}
 				});
@@ -109,6 +115,7 @@
 			    	res.send(200);
 			    }
 				else{
+					winstonInstance.error("Unable to delete schedules to mongodb", err);
 					res.set("Content-Type", "application/json");
 					res.send(404);
 				}
